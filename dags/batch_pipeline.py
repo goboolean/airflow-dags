@@ -85,5 +85,5 @@ with DAG(
             )
 
     # DAG 흐름 정의
-    start >> polygon_to_gcs >> end
+    # start >> polygon_to_gcs >> end
     # TODO: polygon_to_gcs >> split_ticker_to_resample_bucket >> make_several_resampled_data >> insert_to_influxDB
