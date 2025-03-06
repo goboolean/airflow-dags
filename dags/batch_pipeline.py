@@ -9,20 +9,16 @@ from dotenv import load_dotenv
 # .env 파일 로드
 load_dotenv()
 
-# 환경 변수 설정
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-GOOGLE_CREDENTIALS = os.getenv("GOOGLE_CREDENTIALS")
 S3_BUCKET = os.getenv("S3_BUCKET")
 S3_PATH = os.getenv("S3_PATH")
 GCS_BUCKET = os.getenv("GCS_BUCKET")
 GCS_PATH = os.getenv("GCS_PATH")
 
-# 필수 환경 변수 체크
 required_vars = {
     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
-    "GOOGLE_CREDENTIALS": GOOGLE_CREDENTIALS,
     "S3_BUCKET": S3_BUCKET,
     "S3_PATH": S3_PATH,
     "GCS_BUCKET": GCS_BUCKET,
@@ -77,16 +73,15 @@ with DAG(
                 env_vars={
                     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
                     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
-                    "GOOGLE_CREDENTIALS": GOOGLE_CREDENTIALS,
                     "YEAR": year_str,
                     "S3_BUCKET": S3_BUCKET,
                     "S3_PATH": S3_PATH,
                     "GCS_BUCKET": GCS_BUCKET,
                     "GCS_PATH": GCS_PATH,
                 },
+                service_account_name="gcs-service-account",
                 get_logs=True,
                 is_delete_pod=True,
-                # TODO: 리소스 제한 설정 가능 (예: resources={"requests": {"cpu": "500m", "memory": "1Gi"}})
             )
 
     # DAG 흐름 정의
