@@ -34,17 +34,32 @@ if missing_vars:
 
 # DAG 정의
 with DAG(
-    dag_id="polygon_s3_to_gcs",
-    start_date=datetime(2025, 1, 1),
-    schedule_interval=None,  # 스케줄 비활성화로 수동 트리거 전용
-    catchup=False,
+        dag_id="polygon_s3_to_gcs",
+        start_date=datetime(2025, 1, 1),
+        schedule_interval=None,  # 수동 트리거 전용
+        catchup=False,
 ) as dag:
     # 시작과 종료 더미 태스크
     start = DummyOperator(task_id="start")
     end = DummyOperator(task_id="end")
 
-    # 10년치 데이터 (2015~2024)
-    years = range(2015, 2025)
+    # dag_run.conf에서 start_year와 end_year 가져오기 (입력 필수)
+    dagrun = dag.get_dagrun()
+    if dagrun is None or "start_year" not in dagrun.conf or "end_year" not in dagrun.conf:
+        raise ValueError(
+            "Both 'start_year' and 'end_year' must be provided in the DAG run configuration (e.g., {'start_year': 2015, 'end_year': 2025})")
+
+    start_year = dagrun.conf["start_year"]
+    end_year = dagrun.conf["end_year"]
+
+    # 입력 검증
+    if not isinstance(start_year, int) or not isinstance(end_year, int):
+        raise ValueError("'start_year' and 'end_year' must be integers")
+    if start_year > end_year:
+        raise ValueError("'start_year' must be less than or equal to 'end_year'")
+
+    # years 범위 생성 (end_year 포함)
+    years = list(range(start_year, end_year + 1))
 
     with TaskGroup("polygon_to_gcs") as polygon_to_gcs:
         for year in years:
@@ -58,7 +73,7 @@ with DAG(
                 namespace="data-system",
                 image="polygon_fetcher:test",  # 커스텀 이미지
                 cmds=["bash"],
-                arguments=["/app/polygon_to_gcs_batch.sh"],  # Bash 스크립트 경로
+                arguments=["/app/polygon_to_gcs_batch.sh"],
                 env_vars={
                     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
                     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
@@ -69,8 +84,8 @@ with DAG(
                     "GCS_BUCKET": GCS_BUCKET,
                     "GCS_PATH": GCS_PATH,
                 },
-                get_logs=True,  # Pod 로그를 Airflow UI에서 확인 가능
-                is_delete_pod=True,  # 작업 완료 후 Pod 삭제
+                get_logs=True,
+                is_delete_pod=True,
                 # TODO: 리소스 제한 설정 가능 (예: resources={"requests": {"cpu": "500m", "memory": "1Gi"}})
             )
 
