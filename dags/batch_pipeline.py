@@ -55,7 +55,7 @@ with DAG(
             task = KubernetesPodOperator(
                 task_id=task_id,
                 name=f"polygon-transfer-{year}",
-                namespace="default",  # TODO: K8s 네임스페이스 설정 필요 (예: "airflow")
+                namespace="data-system",
                 image="polygon_fetcher:test",  # 커스텀 이미지
                 cmds=["bash"],
                 arguments=["/app/polygon_to_gcs_batch.sh"],  # Bash 스크립트 경로
