@@ -9,20 +9,16 @@ from dotenv import load_dotenv
 # .env 파일 로드
 load_dotenv()
 
+# 환경 변수 가져오기
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-S3_BUCKET = os.getenv("S3_BUCKET")
-S3_PATH = os.getenv("S3_PATH")
-GCS_BUCKET = os.getenv("GCS_BUCKET")
-GCS_PATH = os.getenv("GCS_PATH")
+GCS_PROJECT_ID = os.getenv("GCS_PROJECT_ID")
 
+# 필수 환경 변수 검증
 required_vars = {
     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
-    "S3_BUCKET": S3_BUCKET,
-    "S3_PATH": S3_PATH,
-    "GCS_BUCKET": GCS_BUCKET,
-    "GCS_PATH": GCS_PATH,
+    "GCS_PROJECT_ID": GCS_PROJECT_ID,
 }
 missing_vars = [key for key, value in required_vars.items() if not value]
 if missing_vars:
@@ -43,7 +39,8 @@ with DAG(
     dagrun = dag.get_dagrun()
     if dagrun is None or "start_year" not in dagrun.conf or "end_year" not in dagrun.conf:
         raise ValueError(
-            "Both 'start_year' and 'end_year' must be provided in the DAG run configuration (e.g., {'start_year': 2015, 'end_year': 2025})")
+            "Both 'start_year' and 'end_year' must be provided in the DAG run configuration (e.g., {'start_year': 2015, 'end_year': 2025})"
+        )
 
     start_year = dagrun.conf["start_year"]
     end_year = dagrun.conf["end_year"]
@@ -74,10 +71,7 @@ with DAG(
                     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
                     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
                     "YEAR": year_str,
-                    "S3_BUCKET": S3_BUCKET,
-                    "S3_PATH": S3_PATH,
-                    "GCS_BUCKET": GCS_BUCKET,
-                    "GCS_PATH": GCS_PATH,
+                    "GCS_PROJECT_ID": GCS_PROJECT_ID
                 },
                 service_account_name="gcs-service-account",
                 get_logs=True,
@@ -85,5 +79,5 @@ with DAG(
             )
 
     # DAG 흐름 정의
-    # start >> polygon_to_gcs >> end
+    start >> polygon_to_gcs >> end
     # TODO: polygon_to_gcs >> split_ticker_to_resample_bucket >> make_several_resampled_data >> insert_to_influxDB
