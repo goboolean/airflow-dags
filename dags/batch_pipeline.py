@@ -66,11 +66,10 @@ with DAG(
                 namespace="data-system",
                 image="polygon_fetcher:test",  # 커스텀 이미지
                 cmds=["bash"],
-                arguments=["/app/polygon_to_gcs_batch.sh"],
+                arguments=["/app/polygon_to_gcs_batch.sh", year_str],  # year를 인자로 전달
                 env_vars={
                     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
                     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
-                    "YEAR": year_str,
                     "GCS_PROJECT_ID": GCS_PROJECT_ID
                 },
                 service_account_name="gcs-service-account",
