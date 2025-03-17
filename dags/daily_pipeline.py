@@ -47,13 +47,13 @@ with DAG(
 
     # KubernetesPodOperator로 태스크 정의
     polygon_to_gcs = KubernetesPodOperator(
-        task_id="transfer_daily_data",
+        task_id="polygon_s3_to_gcs_daily",
         name="polygon-transfer-daily",
         namespace="data-system",
         image="polygon_fetcher:test",  # 커스텀 이미지
         cmds=["bash"],
         arguments=[
-            "/app/polygon_to_gcs_batch.sh",
+            "/app/polygon_to_gcs_daily.sh",
             year,  # YEAR 전달
             month,  # MONTH 전달
             day,   # DAY 전달
