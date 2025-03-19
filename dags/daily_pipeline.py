@@ -41,9 +41,9 @@ with DAG(
     end = DummyOperator(task_id="end")
 
     # 실행 날짜 기준 이틀 전 날짜를 YEAR, MONTH, DAY로 분리
-    year = "{{ (execution_date - macros.timedelta(days=2)).strftime('%Y') }}"
-    month = "{{ (execution_date - macros.timedelta(days=2)).strftime('%m') }}"
-    day = "{{ (execution_date - macros.timedelta(days=2)).strftime('%d') }}"
+    year = "{{ (execution_date.in_timezone('Asia/Seoul') - macros.timedelta(days=2)).strftime('%Y') }}"
+    month = "{{ (execution_date.in_timezone('Asia/Seoul') - macros.timedelta(days=2)).strftime('%m') }}"
+    day = "{{ (execution_date.in_timezone('Asia/Seoul') - macros.timedelta(days=2)).strftime('%d') }}"
 
     # KubernetesPodOperator로 태스크 정의
     polygon_to_gcs = KubernetesPodOperator(
