@@ -51,9 +51,7 @@ with DAG(
         name="polygon-transfer-daily",
         namespace="data-system",
         image="polygon_fetcher:test",  # 커스텀 이미지
-        cmds=["bash"],
         arguments=[
-            "/app/polygon_to_gcs_daily.sh",
             year,  # YEAR 전달
             month,  # MONTH 전달
             day,   # DAY 전달
